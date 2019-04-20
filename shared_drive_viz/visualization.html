@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title> Playlist Curator </title>
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans|Raleway" rel="stylesheet">
+    <!-- UIkit JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/uikit/3.0.0-rc.24/js/uikit.min.js"></script>
+    <script defer="defer" src="https://cdnjs.cloudflare.com/ajax/libs/uikit/3.0.0-rc.24/js/uikit-icons.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/uikit/3.0.3/css/uikit.min.css" />
+</head>
+<body>
+    <!-- Navbar -->
+<nav class="uk-navbar-container uk-dark" style="background-color: #ffffff;"uk-navbar>
+    <div class="uk-navbar-left">
+        <div class="uk-navbar-item">
+            <h1>Shared Drive Visualization</h1>
+        </div>
+    </div>
+</nav>
+<div>
+<div class="uk-container uk-container-expand" id="app">
+<directory-accordion :folders="directory_data" :offset="0"></directory-accordion>
+</div>
+</div>
+<script
+  src="https://code.jquery.com/jquery-3.2.1.min.js"
+  integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+  crossorigin="anonymous">
+</script>
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.9/dist/vue.js"></script>
+<script src="./directory.js"></script>
+<script src="./app.js"></script>
+</body>
+</html>
