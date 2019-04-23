@@ -1,10 +1,12 @@
 from boxsdk import Client, DevelopmentClient
 from boxsdk.auth import RedisManagedOAuth2
+from smb.SMBConnection import SMBConnection
+from socket import gethostname
 import json
 
-def get_auth_client():
+def get_auth_box_client():
     with open('private.json', 'r') as f:
-        auth = json.loads(f.read())
+        auth = json.loads(f.read())['box']
 
     option = input('Type "1" to pass a developer token, or anything else to authenticate with OAUTH 2\n>')
     if option == "1":
@@ -25,5 +27,19 @@ def get_auth_client():
         auth_url, csrf = oauth.get_authorization_url('http://localhost')
         print("URL:\n" + auth_url)
         code = input('Provide the Authorization Code\n>')
-        oauth.authenticate(code)
-        return oauth
+        print(oauth.authenticate(code))
+        print(oauth.refresh(oauth.access_token))
+        print(oauth.refresh(oauth.access_token))
+        return Client(oauth)
+
+def get_smb_conn():
+    with open('private.json') as f:
+        auth = json.loads(f.read())['smb']
+    conn = SMBConnection(
+        auth['netid_username'],
+        auth['netid_password'],
+        gethostname()[:15], # computer name can only be 15 characters
+        auth['remote_name'],
+        domain=auth['domain'])
+    conn.connect('cfacfile.byu.edu')
+    return conn
