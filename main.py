@@ -1,35 +1,39 @@
 from lib.auth import get_auth_box_client, get_smb_conn
+from lib.network import upload_file
+from lib.helper import RunningTotal
+from boxsdk import BoxAPIException
 import hashlib
 import os
 
 client = get_auth_box_client()
 conn = get_smb_conn()
 SHARED_DRIVE_PATH = '/College/Public Relations/'
-TEST_FOLDER_ID = "63992343393"
+rt = RunningTotal("Files uploaded:")
 
 buffer = open('buffer', 'rb+')
 
-###
-# Get file from Shared Drive, save to buffer file
-###
-buffer.seek(0)
-conn.retrieveFile('Shared', SHARED_DRIVE_PATH + 'Dance Video Interviews/DSC_0004.MOV', buffer)
-buffer.truncate()
-###
-# Send file to Box, reading in chunks
-###
+result = input("Currently copying Shared Drive files from {0}. Is this ok? (n)\n>".format(SHARED_DRIVE_PATH))
+if result == 'n':
+    SHARED_DRIVE_PATH = input("Provide the path to copy files from\n>")
+BOX_FOLDER_ID = input("What Box folder to upload to (folder id)\n>")
 
-file_name = 'DSC_0004.MOV'
-file_size = os.path.getsize('buffer')
+def upload_folder_contents(path, folder_id):
+    folder = client.folder(folder_id)
+    for f in conn.listPath('Shared', path):
+        if not f.isDirectory and f.filename not in ['.', '..']:
+            rt.next()
+            buffer.seek(0)
+            conn.retrieveFile('Shared', path + f.filename, buffer)
+            buffer.truncate()
+            upload_file(client, folder_id, f.filename, f.file_size, buffer)
+        elif f.isDirectory and f.filename not in ['.', '..']:
+            try:
+                subfolder = folder.create_subfolder(f.filename)
+            except BoxAPIException:
+                for _f in folder.get_items():
+                    if _f.get().name == f.filename:
+                        subfolder = _f
+                        break
+            upload_folder_contents(path + f.filename + '/', subfolder.object_id)
 
-upload_session = client.folder(TEST_FOLDER_ID).create_upload_session(file_size, file_name)
-chunk = 1024 * 1024 * 32 # send 32 MB chunks
-sha_hash = hashlib.sha1()
-buffer.seek(0)
-
-for offset in range(0, file_size, chunk):
-    print(offset)
-    part_content = buffer.read(chunk)
-    sha_hash.update(part_content)
-    upload_session.upload_part_bytes(part_content, offset, file_size)
-upload_session.commit(sha_hash.digest())
+upload_folder_contents(SHARED_DRIVE_PATH, BOX_FOLDER_ID)

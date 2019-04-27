@@ -27,9 +27,6 @@ def get_auth_box_client():
         auth_url, csrf = oauth.get_authorization_url('http://localhost')
         print("URL:\n" + auth_url)
         code = input('Provide the Authorization Code\n>')
-        print(oauth.authenticate(code))
-        print(oauth.refresh(oauth.access_token))
-        print(oauth.refresh(oauth.access_token))
         return Client(oauth)
 
 def get_smb_conn():
